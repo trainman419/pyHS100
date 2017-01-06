@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import json
 import socket
 import logging
+import struct
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,13 +39,30 @@ class TPLinkSmartHomeProtocol:
         if isinstance(request, dict):
             request = json.dumps(request)
 
+        e_request = TPLinkSmartHomeProtocol.encrypt(request)
+
+        #udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #udp_sock.sendto(e_request[4:], (host, port))
+        #udp_sock.settimeout(1.0)
+        #udp_resp = udp_sock.recvfrom(4096)
+        #if udp_resp:
+        #    print udp_resp
+        #    if udp_resp[1] == (host, port):
+        #        response = TPLinkSmartHomeProtocol.decrypt(udp_resp[0])
+        #        _LOGGER.debug("< (%i) %s", len(response), response)
+
+        #        return json.loads(response)
+
+
+        #udp_sock.close()
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(5.0)
+#        sock.settimeout(5.0)
         try:
             sock.connect((host, port))
 
             _LOGGER.debug("> (%i) %s", len(request), request)
-            sock.send(TPLinkSmartHomeProtocol.encrypt(request))
+            sock.send(e_request)
 
             buffer = bytes()
             while True:
@@ -71,7 +89,8 @@ class TPLinkSmartHomeProtocol:
         :return: ciphertext request
         """
         key = TPLinkSmartHomeProtocol.initialization_vector
-        buffer = bytearray(4)  # 4 nullbytes
+        #buffer = bytearray(4)  # 4 nullbytes
+        buffer = bytearray(struct.pack('!i', len(request))) # length of data
 
         for char in request:
             cipher = key ^ ord(char)

@@ -16,6 +16,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 from __future__ import absolute_import
 from __future__ import unicode_literals
+#from future.utils import raise_from
 
 import datetime
 import logging
@@ -103,7 +104,9 @@ class SmartPlug:
                 request={target: {cmd: arg}}
             )
         except Exception as ex:
-            raise SmartPlugException(ex) from ex
+#            raise_from(SmartPlugException(ex), ex)
+#            raise SmartPlugException(ex) from ex
+            raise SmartPlugException(ex)
 
         result = response[target]
         if "err_code" in result and result["err_code"] != 0:

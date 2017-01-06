@@ -1,6 +1,7 @@
 import sys
 import logging
 from pprint import pformat as pf
+import time
 
 from pyHS100 import SmartPlug
 
@@ -12,6 +13,8 @@ if len(sys.argv) < 2:
 
 hs = SmartPlug(sys.argv[1])
 
+#print(hs.time)
+
 logging.info("Identify: %s", hs.identify())
 logging.info("Sysinfo: %s", pf(hs.get_sysinfo()))
 has_emeter = hs.has_emeter
@@ -22,3 +25,7 @@ if has_emeter:
     logging.info(hs.get_emeter_monthly())
     logging.info("== Daily ==")
     logging.info(hs.get_emeter_daily(month=11, year=2016))
+
+hs.turn_on()
+time.sleep(1)
+hs.turn_off()
